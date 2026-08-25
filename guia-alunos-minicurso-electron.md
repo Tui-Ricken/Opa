@@ -10,7 +10,7 @@ atrasar num, ainda consegue acompanhar o próximo.
 - Janela Electron abrindo, processo main + preload configurados
 - Conexão Socket.IO com o servidor (rodando na sua máquina)
 - Lista de mensagens + campo de input funcionando (texto puro, sem nome/cor)
-- `preload.ts` já expondo `window.electronAPI.notify(title, body)` (mas
+- `preload.js` já expondo `window.electronAPI.notify(title, body)` (mas
   ninguém chama essa função ainda — isso é o Bloco 3)
 
 **Eles constroem:**
@@ -26,9 +26,9 @@ atrasar num, ainda consegue acompanhar o próximo.
 - Explique rapidamente: Electron = Chromium + Node.js rodando junto. Por isso
   dá pra ter notificação nativa, tray icon, acesso a arquivo — coisa que um
   site normal não faz.
-- Mostre os 3 processos: **main** (`electron/main.ts`, controla a janela),
-  **preload** (`electron/preload.ts`, ponte segura entre main e renderer),
-  **renderer** (`src/App.tsx`, é o React normal que eles já conhecem).
+- Mostre os 3 processos: **main** (`electron/main.js`, controla a janela),
+  **preload** (`electron/preload.js`, ponte segura entre main e renderer),
+  **renderer** (`src/App.jsx`, é o React normal que eles já conhecem).
 - Rode o projeto pronto na tela, todo mundo conectado no mesmo servidor,
   mande uma mensagem pra provar que funciona.
 - Passe o IP do servidor pro pessoal configurar no `.env` deles
@@ -36,15 +36,15 @@ atrasar num, ainda consegue acompanhar o próximo.
 
 ## Bloco 1 — Nickname e avatar (30 min)
 
-**Onde mexer:** `src/App.tsx` (ou componente `Login.tsx` se você separar)
+**Onde mexer:** `src/App.jsx` (ou componente `Login.jsx` se você separar)
 
 - Antes de entrar no chat, pedir um nickname (input simples + botão "Entrar").
 - Guardar no `useState`. Não precisa persistir — cada sessão pede de novo.
 - Avatar: forma mais rápida pra 3h é gerar um emoji ou letra inicial com base
   no nickname (nada de upload de imagem, foge do tempo).
 
-```tsx
-const getInitial = (nickname: string) => nickname.trim().charAt(0).toUpperCase();
+```jsx
+const getInitial = (nickname) => nickname.trim().charAt(0).toUpperCase();
 ```
 
 - Cada mensagem enviada ao servidor já deve carregar `{ nickname, text }` em
@@ -55,13 +55,13 @@ colega nas mensagens que chegam.
 
 ## Bloco 2 — Cor por usuário (30 min)
 
-**Onde mexer:** função utilitária nova, ex: `src/utils/color.ts`
+**Onde mexer:** função utilitária nova, ex: `src/utils/color.js`
 
 - Gerar uma cor determinística a partir do nickname (mesmo nome = mesma cor
   sempre, sem precisar guardar em lugar nenhum).
 
-```ts
-export function nicknameToColor(nickname: string): string {
+```js
+export function nicknameToColor(nickname) {
   let hash = 0;
   for (let i = 0; i < nickname.length; i++) {
     hash = nickname.charCodeAt(i) + ((hash << 5) - hash);
@@ -77,29 +77,29 @@ export function nicknameToColor(nickname: string): string {
 
 ## Bloco 3 — Notificação nativa (45 min)
 
-**Onde mexer:** `electron/preload.ts` (já pronto) + `src/App.tsx` (chamar)
+**Onde mexer:** `electron/preload.js` (já pronto) + `src/App.jsx` (chamar)
 
 - Explique o porquê do preload existir: o renderer (React) não pode acessar
   APIs do sistema diretamente por segurança. O preload expõe só o que é
   necessário via `contextBridge`.
-- Mostrar o que já está pronto em `preload.ts`:
+- Mostrar o que já está pronto em `preload.js`:
 
-```ts
+```js
 contextBridge.exposeInMainWorld('electronAPI', {
-  notify: (title: string, body: string) => ipcRenderer.send('notify', title, body),
+  notify: (title, body) => ipcRenderer.send('notify', title, body),
 });
 ```
 
-- E no `main.ts` (também já pronto), o listener que efetivamente cria a
+- E no `main.js` (também já pronto), o listener que efetivamente cria a
   notificação:
 
-```ts
-ipcMain.on('notify', (_event, title: string, body: string) => {
+```js
+ipcMain.on('notify', (_event, title, body) => {
   new Notification({ title, body }).show();
 });
 ```
 
-- **O exercício deles**: no `App.tsx`, dentro do listener de mensagem
+- **O exercício deles**: no `App.jsx`, dentro do listener de mensagem
   recebida do Socket.IO, chamar `window.electronAPI.notify(nickname, text)` —
   mas só se a mensagem não for do próprio usuário, e (bônus) só se a janela
   não estiver em foco.
@@ -109,7 +109,7 @@ notificação aparece no canto da tela.
 
 ## Bloco 4 — Comando `/oi` divertido (45 min)
 
-**Onde mexer:** `src/App.tsx`, na função que trata o envio de mensagem
+**Onde mexer:** `src/App.jsx`, na função que trata o envio de mensagem
 
 - Antes de enviar a mensagem pro servidor, checar se o texto começa com `/`.
 - Se for um comando reconhecido, disparar algo visual em vez de mandar texto
@@ -121,7 +121,7 @@ notificação aparece no canto da tela.
   - Deixe livre: se algum aluno terminar antes, sugira criar o próprio
     comando (`/tudobem`, `/tchau`, etc.)
 
-```tsx
+```jsx
 if (text.startsWith('/oi')) {
   confetti();
   socket.emit('message', { nickname, text: `${nickname} mandou um oi! 👋`, type: 'command' });

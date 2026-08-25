@@ -6,7 +6,7 @@ import path from 'node:path'
 // o index.html já buildado.
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 
-let mainWindow: BrowserWindow | null = null
+let mainWindow = null
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -33,7 +33,7 @@ function createWindow() {
 
 // Recebe o pedido de notificação vindo do renderer (via preload/contextBridge)
 // e dispara uma notificação nativa do sistema operacional.
-ipcMain.on('notify', (_event, title: string, body: string) => {
+ipcMain.on('notify', (_event, title, body) => {
   new Notification({ title, body }).show()
 })
 

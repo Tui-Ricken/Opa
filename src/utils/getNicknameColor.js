@@ -14,7 +14,7 @@
 //      contraste legível, ex:
 //        return `hsl(${hue}, 70%, 45%)`
 //   4. Use essa cor no `style={{ color: ... }}` do nome exibido em cada
-//      mensagem (ver App.tsx, no map de mensagens).
-export function getNicknameColor(nickname: string): string {
+//      mensagem (ver App.jsx, no map de mensagens).
+export function getNicknameColor(nickname) {
   return '#333333'
 }

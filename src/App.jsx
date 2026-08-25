@@ -1,42 +1,41 @@
 import { useEffect, useRef, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
-import type { ChatMessage } from './types'
+import { io } from 'socket.io-client'
 
 // TODO COR: quando o nickname existir, importe e use aqui:
-// import { getNicknameColor } from './utils/getNicknameColor'
+import { getNicknameColor } from './utils/getNicknameColor'
 
 // TODO COMANDO: canvas-confetti já está instalado como dependência.
 // Descomente o import abaixo quando for implementar o comando "/oi".
 // import confetti from 'canvas-confetti'
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL as string
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
 
 function App() {
   // TODO NICKNAME: adicione aqui um estado para o nickname, ex:
-  //   const [nickname, setNickname] = useState('')
-  //   const [hasJoined, setHasJoined] = useState(false)
+    const [nickname, setNickname] = useState('')
+    const [hasJoined, setHasJoined] = useState(false)
   // e, enquanto `hasJoined` for false, renderize uma tela simples pedindo
   // o nickname antes de mostrar o chat (troque o `return` deste componente
   // para mostrar essa tela ou o chat, condicionalmente).
 
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
-  const socketRef = useRef<Socket | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const socketRef = useRef(null)
+  const messagesEndRef = useRef(null)
 
   useEffect(() => {
     const socket = io(SERVER_URL)
     socketRef.current = socket
 
-    socket.on('message', (message: ChatMessage) => {
+    socket.on('message', (message) => {
       setMessages((prev) => [...prev, message])
 
       // TODO NOTIFICACAO: dispare uma notificação nativa quando a mensagem
       // recebida NÃO for do próprio usuário (compare `message.nickname`
       // com o nickname local). Exemplo:
-      //   if (message.nickname !== nickname) {
-      //     window.electronAPI.notify(message.nickname, message.text)
-      //   }
+        if (message.nickname !== nickname) {
+          window.electronAPI?.notify(message.nickname, message.text)
+        }
     })
 
     return () => {
@@ -59,9 +58,9 @@ function App() {
     //     confetti()
     //   }
 
-    // TODO NICKNAME: troque o payload abaixo para incluir o nickname, ex:
-    //   const message: ChatMessage = { nickname, text }
-    const message: ChatMessage = { text }
+    // TODO NICKNAME: inclua o nickname no payload quando a tela de entrada
+    // estiver implementada.
+    const message = { text }
 
     // O servidor faz broadcast da mensagem para TODOS os clientes
     // conectados (inclusive quem enviou), então não adicionamos a
@@ -70,7 +69,7 @@ function App() {
     setInput('')
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(event) {
     if (event.key === 'Enter') {
       sendMessage()
     }
