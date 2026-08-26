@@ -27,15 +27,18 @@ function App() {
     const socket = io(SERVER_URL)
     socketRef.current = socket
 
-    socket.on('message', (message) => {
+    socket.on('message', async (message) => {
       setMessages((prev) => [...prev, message])
 
       // TODO NOTIFICACAO: dispare uma notificação nativa quando a mensagem
       // recebida NÃO for do próprio usuário (compare `message.nickname`
       // com o nickname local). Exemplo:
-        if (message.nickname !== nickname) {
+      if (message.nickname !== nickname) {
+        const isFocused = await window.electronAPI?.isWindowFocused()
+        if (!isFocused) {
           window.electronAPI?.notify(message.nickname, message.text)
         }
+      }
     })
 
     return () => {
@@ -60,7 +63,7 @@ function App() {
 
     // TODO NICKNAME: inclua o nickname no payload quando a tela de entrada
     // estiver implementada.
-    const message = { text }
+  const message = { nickname, text }
 
     // O servidor faz broadcast da mensagem para TODOS os clientes
     // conectados (inclusive quem enviou), então não adicionamos a
@@ -75,24 +78,46 @@ function App() {
     }
   }
 
+  
+
+if (!hasJoined) {
   return (
     <div className="app">
-      <header className="app-header">Chat LAN</header>
+      <header className="app-header">Opa</header>
+      <form
+        className="login"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (nickname.trim()) setHasJoined(true)
+        }}
+      >
+        <input
+          type="text"
+          value={nickname}
+          onChange={(event) => setNickname(event.target.value)}
+          placeholder="Como você quer ser chamado?"
+        />
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+  )
+}
 
+return (
+  <div className="app">
+    <header className="app-header">Opa</header>
       <div className="messages">
         {messages.map((message, index) => (
           <div key={index} className="message">
-            {/* TODO NICKNAME + TODO COR: quando o nickname existir, mostre-o
-                antes do texto, com a cor gerada por getNicknameColor. Ex:
-                  <span
-                    className="message-nickname"
-                    style={{ color: getNicknameColor(message.nickname) }}
-                  >
-                    {message.nickname}:
-                  </span>{' '}
-            */}
+            <span className="message-avatar">
+              {message.nickname?.trim().charAt(0).toUpperCase()}
+            </span>
+            <span className="message-nickname"
+              style={{ color: getNicknameColor(message.nickname) }}
+            >{message.nickname}:</span>{' '}
             <span className="message-text">{message.text}</span>
           </div>
+
         ))}
         <div ref={messagesEndRef} />
       </div>
@@ -103,7 +128,7 @@ function App() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Digite sua mensagem..."
+          placeholder="Manda um Opa! 👋"
         />
         <button onClick={sendMessage}>Enviar</button>
       </div>

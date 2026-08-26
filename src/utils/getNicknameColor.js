@@ -16,5 +16,10 @@
 //   4. Use essa cor no `style={{ color: ... }}` do nome exibido em cada
 //      mensagem (ver App.jsx, no map de mensagens).
 export function getNicknameColor(nickname) {
-  return '#333333'
+  let hash = 0
+  for (let i = 0; i < nickname.length; i++) {
+    hash = nickname.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 70%, 45%)`
 }

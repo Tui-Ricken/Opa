@@ -21,7 +21,6 @@ function createWindow() {
 
   if (VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(VITE_DEV_SERVER_URL)
-    mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
@@ -35,6 +34,10 @@ function createWindow() {
 // e dispara uma notificação nativa do sistema operacional.
 ipcMain.on('notify', (_event, title, body) => {
   new Notification({ title, body }).show()
+})
+
+ipcMain.handle('is-window-focused', () => {
+  return mainWindow?.isFocused() ?? false
 })
 
 app.whenReady().then(createWindow)
