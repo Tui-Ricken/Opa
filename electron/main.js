@@ -1,9 +1,6 @@
 import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 import path from 'node:path'
 
-// Em dev, o Vite expõe a URL do servidor de desenvolvimento nessa variável
-// de ambiente (injetada pelo vite-plugin-electron). Em produção, carregamos
-// o index.html já buildado.
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 
 let mainWindow = null
@@ -21,7 +18,6 @@ function createWindow() {
 
   if (VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(VITE_DEV_SERVER_URL)
-    mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
